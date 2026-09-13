@@ -1,4 +1,4 @@
-trash="thisisabracadabraHt1eadljjl12ojh."
+trash=input()
 clear=""
 n1=0
 n2=0

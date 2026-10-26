@@ -150,7 +150,6 @@
 ![Таблица](images/lab03/text_table.png)
 
 ---
-<<<<<<< HEAD
 
 ## [Лабораторная работа №4](src/lab04/) `ВЫПОЛНЕНА`
 
@@ -241,5 +240,3 @@ python3 -m src.lab04.text_report --in data/a.txt data/b.txt --per-file data/repo
 ## Сброс файла ``input.txt`` для повторного запуска тестов:
 
 ![Проведение сброса](images/lab04/Treset.png)
-=======
->>>>>>> 12ef2e561bc9fe4d50ab068b4e75062aaed19e20

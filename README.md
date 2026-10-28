@@ -155,17 +155,19 @@
 
 ### A - io_txt_csv.py — [src/lab04/io_txt_csv.py](src/lab04/io_txt_csv.py)
 
-- `read_text` — читает файл целиком в одну строку. Кодировка по умолчанию `utf-8`, другую можно передать так: `read_text("file.txt", encoding="cp1251")`. Если файла нет — `FileNotFoundError`, если кодировка не подходит — `UnicodeDecodeError`.
+- `read_text` — читает файл целиком в одну строку. Сначала пробует `utf-8`. Если файл в `utf-8`, параметр `encoding` не применяется. Только если `utf-8` не подошёл, файл читается в указанной кодировке: `read_text("file.txt", encoding="cp1251")`. Если файла нет — `FileNotFoundError`, если не подошла ни одна кодировка — `UnicodeDecodeError`.
 - `write_csv` — создаёт или перезаписывает CSV (разделитель `,`, кодировка UTF-8). Если передан `header`, он пишется первой строкой. Если строки разной длины — `ValueError`.
 - `ensure_parent_dir` — создаёт родительские папки, если их нет.
 
 **Пустые данные:** `write_csv` с пустым `rows` и без `header` создаёт пустой файл, а с `header` — файл только с заголовком.
 
-**Тест:**
+**Тест (запись и чтение):**
+
+```bash
+python3 -c "from src.lab04.io_txt_csv import read_text, write_csv; write_csv([('test', 3)], 'data/check.csv', header=('word', 'count')); print(read_text('data/check.csv'))"
+```
 
 ![Тест A: Один Файл](images/lab04/At.png)
-
-
 
 ---
 
@@ -173,37 +175,47 @@
 
 Скрипт читает текстовый файл, считает частоты слов (функции из ЛР3), сохраняет отчёт в CSV и печатает в консоль краткое резюме и таблицу.
 
-**Запуск**:
+**Запуск** (через `-m`, чтобы Python нашёл пакет `src`):
 
-Запуск через `-m` нужен, чтобы Python нашёл пакет `src`.
+```bash
+printf 'Привет, мир! Привет!!!\n' > data/input.txt && python3 -m src.lab04.text_report && cat data/report.csv
+```
 
 **Параметры:** `--in` (входной файл, по умолчанию `data/input.txt`), `--out` (по умолчанию `data/report.csv`), `--encoding` (по умолчанию `utf-8`).
 
 **Решения:**
-- **Нет файла** или **неверная кодировка:** выводится код выхода 1.
+- **Нет файла** или **неверная кодировка:** выводится понятное сообщение и код выхода 1.
 - **Пустой файл:** `report.csv` содержит только заголовок `word,count`.
-- **Кодировка cp1251:** передаётся через `--encoding cp1251`.
+- **Кодировка cp1251:** передаётся через `--encoding cp1251`, расшифровка применяется только если файл не читается как `utf-8`.
 - **Большие файлы:** файл читается целиком; в реальных задачах лучше читать построчно.
 
 ![Запуск: один файл](images/lab04/Bt.png)
 
 ![report.csv](images/lab04/report_image.png)
 
----
-
-### Тест C — кодировка cp1251
-
-Программа читает файл, сохранённый в кодировке `cp1251` (Windows), если передать её параметром `--encoding`.
-
-**Как работает код:** `read_text` открывает файл в указанной кодировке (по умолчанию `utf-8`). Если кодировка не подходит, Python поднимает `UnicodeDecodeError`, и скрипт выводит понятное сообщение с подсказкой `Попробуйте --encoding cp1251` и завершается с кодом 1.
-
-**Запуск:**
+**Пустой файл:**
 
 ```bash
-python3 -m src.lab04.text_report --encoding cp1251
+: > data/input.txt && python3 -m src.lab04.text_report && cat data/report.csv
 ```
 
-**Вывод:**
+![Пустой файл](images/lab04/Bempty.png)
+
+---
+
+### Тест C — параметр `--encoding`
+
+`read_text` сначала пробует прочитать файл как `utf-8`. Если получилось, параметр `--encoding` не используется. Если `utf-8` не подошёл, файл читается в кодировке из `--encoding`. Если не подошла и она, скрипт выводит сообщение с подсказкой `Попробуйте --encoding cp1251` и завершается с кодом 1.
+
+Так расшифровка делается только тогда, когда она нужна, и обычный `utf-8` файл не превращается в кракозябры, даже если указать `--encoding cp1251`.
+
+**C1. Файл действительно в cp1251** (расшифровка нужна и выполняется):
+
+```bash
+printf 'Привет' | iconv -f UTF-8 -t CP1251 > data/input.txt && python3 -m src.lab04.text_report --encoding cp1251 && cat data/report.csv
+```
+
+Вывод (кратко):
 
 ```
 Всего слов: 1
@@ -219,7 +231,15 @@ word,count
 привет,1
 ```
 
-![Тест C: cp1251](images/lab04/Ct.png)
+![Тест C1: файл в cp1251](images/lab04/Ct.png)
+
+**C2. Файл в utf-8, но указан `--encoding cp1251`** (расшифровка не нужна и не применяется, результат тот же, без кракозябр):
+
+```bash
+printf 'Привет' > data/input.txt && python3 -m src.lab04.text_report --encoding cp1251 && cat data/report.csv
+```
+
+![Тест C2: utf-8 с флагом cp1251](images/lab04/Ct2.png)
 
 ---
 
@@ -228,10 +248,8 @@ word,count
 Если передать несколько файлов, скрипт создаёт два отчёта: `report_per_file.csv` (колонки `file,word,count`) и `report_total.csv` (`word,count`). Таблица в консоль печатается всегда, ширина столбцов по самому длинному значению.
 
 ```bash
-python3 -m src.lab04.text_report --in data/a.txt data/b.txt --per-file data/report_per_file.csv --total data/report_total.csv
+printf 'Привет мир' > data/a.txt && printf 'Привет, привет!' > data/b.txt && python3 -m src.lab04.text_report --in data/a.txt data/b.txt && cat data/report_per_file.csv data/report_total.csv
 ```
-
-В примере из задания у `a.txt` строка `привет` стоит перед `мир`, но по правилу сортировки (`file ↑`, `count ↓`, `word ↑`) при равных количествах слова идут по алфавиту, поэтому в отчёте `мир` идёт раньше. Реализована сортировка по правилу.
 
 ![Несколько файлов](images/lab04/D_star.png)
 
@@ -239,4 +257,51 @@ python3 -m src.lab04.text_report --in data/a.txt data/b.txt --per-file data/repo
 
 ## Сброс файла ``input.txt`` для повторного запуска тестов:
 
+```bash
+: > data/input.txt
+```
+
 ![Проведение сброса](images/lab04/Treset.png)
+
+---
+
+## [Лабораторная работа №5](src/lab05/) `ВЫПОЛНЕНА`
+
+### Что сделано
+- `src/lab05/json_csv.py` — функции `json_to_csv` и `csv_to_json`
+- `src/lab05/csv_xlsx.py` — функция `csv_to_xlsx` (библиотека openpyxl)
+- примеры в `data/samples/`, результаты в `data/out/`
+
+### Установка нужных библиотек
+```
+pip3 install -r requirements.txt
+```
+
+### Допущения
+- JSON должен быть списком словарей.
+- Порядок колонок в CSV: как в первом объекте, новые ключи из остальных идут в конец.
+- Пропущенные поля заполняются пустой строкой.
+- Все значения из CSV в JSON остаются строками.
+- Кодировка везде UTF-8.
+- Ошибки: неверное расширение или пустой файл — `ValueError`, нет файла — `FileNotFoundError`.
+
+### Задание A: JSON → CSV
+```
+python3 -c "from src.lab05.json_csv import json_to_csv; json_to_csv('data/samples/people.json', 'data/out/people_from_json.csv')"
+```
+![json_to_csv](images/lab05/json_to_csv.png)
+
+### Задание A: CSV → JSON
+```
+python3 -c "from src.lab05.json_csv import csv_to_json; csv_to_json('data/samples/people.csv', 'data/out/people_from_csv.json')"
+```
+![csv_to_json](images/lab05/csv_to_json.png)
+
+### Задание B: CSV → XLSX
+```
+python3 -c "from src.lab05.csv_xlsx import csv_to_xlsx; csv_to_xlsx('data/samples/people.csv', 'data/out/people.xlsx')"
+```
+![xlsx](images/lab05/xlsx.png)
+
+### Проверка ошибок
+![errors](images/lab05/errors.png)

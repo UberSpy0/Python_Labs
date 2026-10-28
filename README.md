@@ -267,9 +267,9 @@ printf 'Привет мир' > data/a.txt && printf 'Привет, привет!
 
 ## [Лабораторная работа №5](src/lab05/) `ВЫПОЛНЕНА`
 
-### Что сделано
+### Что выполнено
 - `src/lab05/json_csv.py` — функции `json_to_csv` и `csv_to_json`
-- `src/lab05/csv_xlsx.py` — функция `csv_to_xlsx` (библиотека openpyxl)
+- `src/lab05/csv_xlsx.py` — функция `csv_to_xlsx` (с использованием библиотеки openpyxl)
 - примеры в `data/samples/`, результаты в `data/out/`
 
 ### Установка нужных библиотек
@@ -285,19 +285,19 @@ pip3 install -r requirements.txt
 - Кодировка везде UTF-8.
 - Ошибки: неверное расширение или пустой файл — `ValueError`, нет файла — `FileNotFoundError`.
 
-### Задание A: JSON → CSV
+### Задание A: JSON to CSV
 ```
 python3 -c "from src.lab05.json_csv import json_to_csv; json_to_csv('data/samples/people.json', 'data/out/people_from_json.csv')"
 ```
 ![json_to_csv](images/lab05/json_to_csv.png)
 
-### Задание A: CSV → JSON
+### Задание A: CSV to JSON
 ```
 python3 -c "from src.lab05.json_csv import csv_to_json; csv_to_json('data/samples/people.csv', 'data/out/people_from_csv.json')"
 ```
 ![csv_to_json](images/lab05/csv_to_json.png)
 
-### Задание B: CSV → XLSX
+### Задание B: CSV to XLSX
 ```
 python3 -c "from src.lab05.csv_xlsx import csv_to_xlsx; csv_to_xlsx('data/samples/people.csv', 'data/out/people.xlsx')"
 ```

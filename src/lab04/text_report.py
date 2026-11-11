@@ -5,7 +5,7 @@ from src.lib.text import normalize, tokenize, count_freq, top_n
 from src.lab04.io_txt_csv import read_text, write_csv, ensure_parent_dir
 
 
-def print_table(header, rows):
+def print_table(header, rows):     #Создание таблицы
     table = [header] + [tuple(str(v) for v in row) for row in rows]
     widths = [max(len(row[i]) for row in table) for i in range(len(header))]
 
@@ -33,7 +33,7 @@ def read_or_exit(path, encoding):   #обработка ошибок
         raise SystemExit(1)
 
 
-def main():
+def main():             #реализация режимов командной строки(флагов)
     parser = argparse.ArgumentParser(description="Частотный отчёт по текстам")
     parser.add_argument("--in", dest="inputs", nargs="+", default=["data/input.txt"],
                         help="один или несколько входных файлов")

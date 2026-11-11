@@ -287,7 +287,7 @@ pip3 install -r requirements.txt
 
 ### Задание A: JSON to CSV
 ```
-python3 -c "from src.lab05.json_csv import json_to_csv; json_to_csv('data/samples/people.json', 'data/out/people_from_json.csv')"
+python3 -c "from src.lab05.json_csv import json_to_csv; json_to_csv('data/samples/people.json', 'data/out/people_from_json.csv')" && cat data/out/people_from_json.csv && wc -l data/out/people_from_json.csv
 ```
 ![json_to_csv](images/lab05/json_to_csv.png)
 
@@ -303,5 +303,73 @@ python3 -c "from src.lab05.csv_xlsx import csv_to_xlsx; csv_to_xlsx('data/sample
 ```
 ![xlsx](images/lab05/xlsx.png)
 
-### Проверка ошибок
-![errors](images/lab05/errors.png)
+---
+
+## [Лабораторная работа №6](src/lab06/) `ВЫПОЛНЕНА`
+
+Консольные утилиты на `argparse`. Запускаются как модули (`python3 -m ...`) из корня репозитория, чтобы Python нашёл пакет `src`.
+
+### A - cli_text.py — [src/lab06/cli_text.py](src/lab06/cli_text.py)
+
+- `cat --input <файл> [-n]` — печатает файл построчно, с `-n` перед строкой добавляется её номер.
+- `stats --input <файл> [--top 5]` — считает слова (функции из ЛР3) и печатает всего слов, уникальных слов и топ-N.
+
+**Решения:**
+- Нет файла — сообщение `Ошибка: файл не найден: ...` и код выхода 1.
+- `--top` меньше 1 — ошибка через `parser.error`.
+- `--help` работает для программы и для каждой подкоманды.
+
+```bash
+python3 -m src.lab06.cli_text cat --input data/samples/people.csv -n
+```
+
+![cat -n](images/lab06/cat.png)
+
+```bash
+python3 -m src.lab06.cli_text stats --input data/samples/people.txt --top 5
+```
+
+![stats](images/lab06/stats.png)
+
+```bash
+python3 -m src.lab06.cli_text --help
+```
+
+![help cli_text](images/lab06/help_text.png)
+
+### B - cli_convert.py — [src/lab06/cli_convert.py](src/lab06/cli_convert.py)
+
+Три подкоманды вызывают функции из ЛР5. У всех одинаковые параметры: `--in` (входной файл) и `--out` (выходной файл), оба обязательные.
+
+```bash
+python3 -m src.lab06.cli_convert json2csv --in data/samples/people.json --out data/out/people.csv
+```
+
+![json2csv](images/lab06/json2csv.png)
+
+```bash
+python3 -m src.lab06.cli_convert csv2json --in data/samples/people.csv --out data/out/people.json
+```
+
+![csv2json](images/lab06/csv2json.png)
+
+```bash
+python3 -m src.lab06.cli_convert csv2xlsx --in data/samples/people.csv --out data/out/people.xlsx
+```
+
+![csv2xlsx](images/lab06/csv2xlsx.png)
+
+```bash
+python3 -m src.lab06.cli_convert --help
+```
+
+![help cli_convert](images/lab06/help_convert.png)
+
+**Ошибки** (нет файла и неверное расширение дают понятное сообщение и код выхода 1):
+
+```bash
+python3 -m src.lab06.cli_text cat --input nope.txt
+python3 -m src.lab06.cli_convert json2csv --in data/samples/people.csv --out data/out/x.csv
+```
+
+![errors lab06](images/lab06/errors.png)

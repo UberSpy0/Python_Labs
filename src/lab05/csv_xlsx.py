@@ -6,7 +6,8 @@ from openpyxl import Workbook
 
 def csv_to_xlsx(csv_path, xlsx_path):
     """
-    Конвертация CSV в XLSX
+    CSV -> XLSX. Первая строка CSV - заголовок, лист "Sheet1",
+    ширина колонок по длине текста (не меньше 8).
     """
     src = Path(csv_path)
     dst = Path(xlsx_path)

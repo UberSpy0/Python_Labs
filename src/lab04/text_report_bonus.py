@@ -5,7 +5,7 @@ from src.lib.text import normalize, tokenize, count_freq, top_n
 from src.lab04.io_txt_csv import read_text, write_csv, ensure_parent_dir
 
 
-def main():
+def main():                 #реализация режимов командной строки(флагов)
     parser = argparse.ArgumentParser(description="Отчёт по нескольким файлам")
     parser.add_argument("--in", dest="inputs", nargs="+", required=True,
                         help="входные файлы, например data/a.txt data/b.txt")

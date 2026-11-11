@@ -373,3 +373,135 @@ python3 -m src.lab06.cli_convert json2csv --in data/samples/people.csv --out dat
 ```
 
 ![errors lab06](images/lab06/errors.png)
+
+---
+
+## [Лабораторная работа №7](src/lab07/) `ВЫПОЛНЕНА`
+
+Поиск, сортировки и замеры времени.
+
+### A - search.py — [src/lab07/search.py](src/lab07/search.py)
+
+- `linear_search(nums, x)` — индекс первого вхождения или `-1`.
+- `binary_search(sorted_nums, x)` — индекс или `-1`, список должен быть отсортирован.
+- `two_sum_brute(nums, target)` — перебор пар.
+- `two_sum_fast(nums, target)` — один проход со словарём.
+
+`two_sum` возвращает `(i, j)` с `i < j` или `None`.
+
+### B - sorting.py — [src/lab07/sorting.py](src/lab07/sorting.py)
+
+`bubble_sort` (с ранним выходом), `insertion_sort`, `selection_sort`. Возвращают новый список, без `sorted`, `.sort()`, `min`, `max`.
+
+Бонусное задание: `merge_sort` и `counting_sort(nums, lo, hi)`.
+
+### C - check.py — [src/lab07/check.py](src/lab07/check.py)
+
+Случайные тесты (`random.seed(42)`) сравнивают функции с эталоном.
+
+```bash
+python3 -m src.lab07.check
+```
+
+Результат: `OK: 1009 проверок`.
+
+![check](images/lab07/check.png)
+
+### D - bench.py — [src/lab07/bench.py](src/lab07/bench.py)
+
+```bash
+python3 -m src.lab07.bench
+```
+
+Одни и те же данные (`random.seed(42)`), замеры через `timeit`, результат в [data/lab07/bench.csv](data/lab07/bench.csv).
+
+![bench](images/lab07/bench.png)
+
+Примечания: квадратичные сортировки на `n = 100000` пропущены (`>60`); пара для `two_sum` стоит в конце списка (худший случай); `counting_sort` показан на диапазоне 0–1000.
+
+### Выводы
+
+**Пузырёк и рост n.** Пузырёк делает порядка n² операций, поэтому при росте `n` в 10 раз время растёт примерно в 100 раз (<t при 1000> сек до <t при 10000> сек). `sorted` делает n·log n, рост примерно в 12 раз.
+
+**Бинарный поиск и сортировка.** Бинарный поиск работает только на отсортированном списке: иначе неясно, в какую половину идти. Сортировка стоит n·log n, поиск после неё log n. На 10 000 запросов: линейный <время> с, сортировка + бинарный <время> с. Сортировка окупается при многих запросах, для одного-двух проще линейный поиск.
+
+---
+
+## [Лабораторная работа №8](src/lab08/) `ВЫПОЛНЕНА`
+
+Модель данных без классов: запись `Student` — обычный словарь с фиксированным набором ключей, валидация и сериализация в JSON.
+
+### Структура записи
+
+```python
+STUDENT_FIELDS = ("fio", "birthdate", "group", "gpa")
+
+{"fio": "Иванов Иван Иванович", "birthdate": "2007-05-14", "group": "БИВТ-26-6-1", "gpa": 4.3}
+```
+
+| Поле | Тип | Правило |
+|---|---|---|
+| `fio` | str | непустая строка (после `strip()`) |
+| `birthdate` | str | формат `YYYY-MM-DD`, дата существует и не в будущем |
+| `group` | str | непустая строка |
+| `gpa` | float | число от 0 до 5; `int` допустим и приводится к `float`; `bool` не принимается |
+
+### A - models.py — [src/lab08/models.py](src/lab08/models.py)
+
+- `make_student(fio, birthdate, group, gpa)` — функция-конструктор: проверяет каждое поле и возвращает словарь. При плохих данных — `ValueError` с понятным сообщением (какое поле и почему).
+- `validate_student(rec)` — проверяет готовый словарь: ровно `STUDENT_FIELDS` (ничего лишнего и ничего пропущенного) и значения полей.
+- `student_age(rec, today=None)` — полных лет на дату `today`. Если день рождения в этом году ещё не наступил, из разности годов вычитается 1.
+- `format_student(rec)` — строка вида `Иванов И.И. (БИВТ-26-6-1), 19 лет, GPA 4.30`.
+- `student_to_dict(rec)` — проверяет запись и возвращает её **копию** (новый словарь).
+- `student_from_dict(d)` — десериализация: берёт ровно нужные ключи (лишние игнорируются), приводит `gpa` к `float` (в том числе из строки, так приходит значение из CSV), затем валидирует.
+- ★ `update_student(rec, **fields)` — возвращает **новую** запись, исходная не меняется. Неизвестный ключ — `KeyError`, неверное значение — `ValueError`.
+
+**Дата:** формат проверяет регулярка, а существование — `date.fromisoformat` (так `2003-02-30` отклоняется).
+
+### B - serialize.py — [src/lab08/serialize.py](src/lab08/serialize.py)
+
+- `students_to_json(students, path)` — сохраняет массив объектов (`ensure_ascii=False`, `indent=2`).
+- `students_from_json(path, policy="strict")` — читает массив, каждую запись прогоняет через `student_from_dict`.
+- ★ `students_from_csv(path)` — чтение через `csv.DictReader`. `gpa` из CSV приходит строкой, превращается в `float` внутри `student_from_dict`.
+
+**Политика обработки битых записей.** По умолчанию `strict`: первая же ошибка прерывает чтение и выбрасывает `ValueError` с номером записи и причиной. Так молча не пропускаются плохие данные. Дополнительно есть режим `policy="skip"`: битые записи пропускаются, а в консоль печатается, сколько пропущено и почему.
+
+### Примеры JSON
+
+До (`data/lab08/students_input.json`):
+
+```json
+[
+  {"fio": "Иванов Иван Иванович", "birthdate": "2007-05-14", "group": "БИВТ-26-6-1", "gpa": 4.3},
+  {"fio": "Петрова Анна Сергеевна", "birthdate": "2006-03-21", "group": "БИВТ-26-6-1", "gpa": 4.8},
+  {"fio": "Сидоров Пётр Андреевич", "birthdate": "2006-11-02", "group": "БИВТ-26-6-2", "gpa": 4}
+]
+```
+
+После (`data/lab08/students_output.json`): целый `gpa: 4` превратился в `4.0`.
+
+(ВСТАВЬТЕ СЮДА ТЕКСТ ИЗ ВАШЕГО students_output.json: `cat data/lab08/students_output.json`)
+
+Битый файл `data/lab08/students_bad.json`: у второй записи дата `2003-02-30`, у третьей `gpa = 7`.
+
+### Запуск
+
+```bash
+python3 -m src.lab08.demo
+```
+
+**Корректные записи туда-обратно:**
+
+![туда-обратно](images/lab08/roundtrip.png)
+
+**Запись с неверной датой:**
+
+![неверная дата](images/lab08/bad_date.png)
+
+**Запись с gpa = 7:**
+
+![gpa 7](images/lab08/bad_gpa.png)
+
+**Битый файл: strict и skip:**
+
+![strict и skip](images/lab08/policy.png)

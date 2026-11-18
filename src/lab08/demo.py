@@ -1,5 +1,6 @@
-from src.lab08.models import make_student, format_student, update_student
-from src.lab08.serialize import students_to_json, students_from_json
+from pathlib import Path
+from .models import make_student, format_student, update_student
+from .serialize import students_to_json, students_from_json
 
 
 def main():

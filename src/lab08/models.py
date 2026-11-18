@@ -122,7 +122,7 @@ def student_from_dict(d):
 
 def update_student(rec, **fields):
     """
-    * Возвращает НОВУЮ запись с изменёнными полями, исходная не меняется
+    *Возвращает НОВУЮ запись с изменёнными полями, исходная не меняется
     """
     for key in fields:
         if key not in STUDENT_FIELDS:

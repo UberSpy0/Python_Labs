@@ -301,7 +301,9 @@ python3 -c "from src.lab05.json_csv import csv_to_json; csv_to_json('data/sample
 ```
 python3 -c "from src.lab05.csv_xlsx import csv_to_xlsx; csv_to_xlsx('data/samples/people.csv', 'data/out/people.xlsx')"
 ```
-![xlsx](images/lab05/xlsx.png)
+![xlsx](./images/lab05/xlsx.png)
+
+![](./images/lab05/xslx.png)
 
 ---
 
